@@ -54,10 +54,10 @@ public:
      * Initialize an internal buffer to store these types.
      *
      */
-    template <typename H, typename... Tail>
+    template <typename H, typename... Tail, size_t N = types_size<H, Tail...>()>
     size_t initializeBuffer(){
-        constexpr size_t N = types_size<H, Tail...>();
         _data.resize(N);
+
         return N;
     }
 
@@ -78,6 +78,7 @@ public:
     size_t size() const{
         return _data.size();
     }
+
 
     /*!
      * \brief Serialize these values into the internal buffer.
@@ -139,6 +140,7 @@ public:
 
 private:
     std::vector<uint8_t> _data;
+    std::string numpy_dtype;
 
     template <typename H, typename... Tail>
     static void serialize_impl(uint8_t *data, const size_t n, const H &head, const Tail & ... t){
