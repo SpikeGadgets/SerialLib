@@ -1,6 +1,6 @@
 #include "serializer.h"
 
-Serializer::Serializer()
-{
+//Serializer::Serializer()
+//{
 
-}
+//}

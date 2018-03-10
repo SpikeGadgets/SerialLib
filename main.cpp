@@ -1,12 +1,23 @@
-#include <iostream>
 #include "serializer.h"
-using namespace std;
+#include <iostream>
+#include <cstring>
 
 int main()
 {
-    cout << "Hello World!" << endl;
     Serializer s;
-    int i = 0; float f = 1.1;
-    cout << "size of int + float " << s.serialize(i,f).size() << std::endl;
+    s.initializeBuffer<int,double, uint32_t>();
+    uint8_t *datacpy = new uint8_t[s.size()];
+    {
+        int i = 1; double f = 1.123; uint32_t time = 5;
+        std::cout << "i:" << i << ", f:" << f << ", time:" << time << std::endl;
+        uint8_t *data = s.serialize(i,f, time);
+        memcpy(datacpy, data, s.size());
+    }
+
+    {
+        int j; double k; uint32_t t;
+        Serializer::deserialize(datacpy, j, k, t);
+        std::cout << "j:" << j << ", k:" << k << ", time:" << t<< std::endl;
+    }
     return 0;
 }
