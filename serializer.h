@@ -1,15 +1,11 @@
 #ifndef SERIALIZER_H
 #define SERIALIZER_H
 
-//#include "binarydata.h"
-//#include <array>
-#include <vector>
-#include <iostream>
+#include "serializer_helpers.h"
+#include <array>
+#include <string>
 
-struct BinaryData{
-    uint8_t *dataptr;
-    size_t size;
-};
+namespace SpkG {
 
 //! Serializer is a class that uses template magic to generate at compile-time the
 //! necessary pointer math for serializing a buffer with a set of values of varying types.
@@ -34,32 +30,16 @@ struct BinaryData{
         s.deserialize(data, j, k);
     }
  */
+template <typename ... Types>
 class Serializer
 {
-private:
-    // Ignore these three functions
-    template<std::size_t ... X> struct add_all : std::integral_constant< std::size_t,0 > {};
-    template<std::size_t X, std::size_t ... Xs> struct add_all<X,Xs...> : std::integral_constant< std::size_t, X + add_all<Xs...>::value > {};
-    template<typename... T> static constexpr size_t types_size(){return add_all<sizeof(T)...>::value;}
-    // https://stackoverflow.com/questions/12024304/c11-number-of-variadic-template-function-parameters
-
 public:
-    Serializer(){}
+    Serializer() : _data({0}){
+
+    }
     ~Serializer(){
-        _data.clear();
     }
 
-    /*!
-     * \brief size_t initializeBuffer<Types...>()
-     * Initialize an internal buffer to store these types.
-     *
-     */
-    template <typename H, typename... Tail, size_t N = types_size<H, Tail...>()>
-    size_t initializeBuffer(){
-        _data.resize(N);
-
-        return N;
-    }
 
     /*!
      * \brief uint8_t* dataPtr()
@@ -67,7 +47,7 @@ public:
      * modify the data yourself.
      * \return uint8_t* pointer to internal data buffer
      */
-    const uint8_t* dataPtr() const{
+    const uint8_t* data() const{
         return _data.data();
     }
 
@@ -75,10 +55,13 @@ public:
      * \brief Get size of internal buffer
      * \return size_t internal buffer size
      */
-    size_t size() const{
-        return _data.size();
+    constexpr size_t size() const{
+        return types_size<Types...>();
     }
 
+    constexpr std::string numpyType() const{
+        return toNumpyStr<Types...>();
+    }
 
     /*!
      * \brief Serialize these values into the internal buffer.
@@ -90,25 +73,24 @@ public:
      * uint8_t *data = serialize(i, j, k, f, t); //data now points to the buffer
      */
     template <typename H, typename... Tail>          //Variadic Template declaration
-    uint8_t* serialize(const H &head, const Tail & ... t){
-        serialize_impl(_data.data(), _data.size(), head, t...);
-        return &_data[0];
+    void serialize(const H &head, const Tail & ... t){
+        serialize_impl(&_data[0], 0, head, t...);
     }
 
-    /*!
-     * \brief Serialize these values into your own buffer.
-     * There is no size parameter, so your buffer *must* be large enough.
-     *
-     * Example usage:
-     * int i=1,j=2,k=3; float f=3.14; uint32_t t=12345; //int=4bytes,float=4,uint32=4
-     * uint8_t data[20];
-     * Serializer::serializeInto(data, i, j, k, f, t); //Values are copied into data[]
-     */
-    template <typename H, typename... Tail>
-    static void serializeInto(uint8_t* data, const H &head, const Tail & ... t){
-        constexpr size_t N = types_size<H,Tail...>();
-        serialize_impl(data, N, head, t...);
-    }
+//    /*!
+//     * \brief Serialize these values into your own buffer.
+//     * There is no size parameter, so your buffer *must* be large enough.
+//     *
+//     * Example usage:
+//     * int i=1,j=2,k=3; float f=3.14; uint32_t t=12345; //int=4bytes,float=4,uint32=4
+//     * uint8_t data[20];
+//     * Serializer::serializeInto(data, i, j, k, f, t); //Values are copied into data[]
+//     */
+//    template <typename H, typename... Tail>
+//    static void serializeInto(uint8_t* data, const H &head, const Tail & ... t){
+//        constexpr size_t N = types_size<H,Tail...>();
+//        serialize_impl(data, N, head, t...);
+//    }
 
     /*!
      * \brief Get the size of these types in bytes, known at compile time
@@ -139,19 +121,17 @@ public:
     }
 
 private:
-    std::vector<uint8_t> _data;
-    std::string numpy_dtype;
+    std::array<uint8_t, types_size<Types...>()> _data;
 
     template <typename H, typename... Tail>
-    static void serialize_impl(uint8_t *data, const size_t n, const H &head, const Tail & ... t){
-        int pos = n - types_size<H,Tail...>();
+    static void serialize_impl(uint8_t *data, const int pos, const H &head, const Tail & ... t){
         save<H>(data, pos, head);
-        serialize_impl(data, n, t...);
+        serialize_impl(data, pos + sizeof(H), t...);
     }
-    static void serialize_impl(uint8_t *data, const size_t n){}
+    static void serialize_impl(uint8_t *data, int pos){}
 
     template<typename T>
-    static void save(uint8_t *data, int pos, const T &val){
+    static void save(uint8_t *data, const int pos, const T &val){
         *(T*)(data+pos) = val;
     }
 
@@ -165,9 +145,10 @@ private:
     static void deserialize_impl(const uint8_t *data, const size_t n){}
 
     template<typename T>
-    static void load(const uint8_t *data, int pos, T &val){
+    static void load(const uint8_t *data, const int pos, T &val){
         val = *(T*)(data+pos);
     }
 };
 
+}//namespace SpkG
 #endif // SERIALIZER_H
