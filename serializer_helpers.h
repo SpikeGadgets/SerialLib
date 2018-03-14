@@ -6,28 +6,28 @@ namespace SpkG{
 
 
 //    https://stackoverflow.com/questions/11184223/c-function-variadic-templates-with-no-arguments
-template <class T>std::string type_to_string();
-template <> std::string type_to_string<bool>()      {return "?";}
-template <> std::string type_to_string<uint8_t>()   {return "u1";}
-template <> std::string type_to_string<uint16_t>()  {return "u2";}
-template <> std::string type_to_string<uint32_t>()  {return "u4";}
-template <> std::string type_to_string<uint64_t>()  {return "u8";}
-template <> std::string type_to_string<int8_t>()    {return "i1";}
-template <> std::string type_to_string<int16_t>()   {return "i2";}
-template <> std::string type_to_string<int>()       {return "i4";}
+template <class T>inline std::string type_to_string();
+template <> inline std::string type_to_string<bool>()      {return "?";}
+template <> inline std::string type_to_string<uint8_t>()   {return "u1";}
+template <> inline std::string type_to_string<uint16_t>()  {return "u2";}
+template <> inline std::string type_to_string<uint32_t>()  {return "u4";}
+template <> inline std::string type_to_string<uint64_t>()  {return "u8";}
+template <> inline std::string type_to_string<int8_t>()    {return "i1";}
+template <> inline std::string type_to_string<int16_t>()   {return "i2";}
+template <> inline std::string type_to_string<int>()       {return "i4";}
 //template <> std::string type_to_string<int32_t>()   {return "i4";}
-template <> std::string type_to_string<int64_t>()   {return "i8";}
-template <> std::string type_to_string<float>()     {return "f4";}
-template <> std::string type_to_string<double>()    {return "f8";}
+template <> inline std::string type_to_string<int64_t>()   {return "i8";}
+template <> inline std::string type_to_string<float>()     {return "f4";}
+template <> inline std::string type_to_string<double>()    {return "f8";}
 
 static_assert(std::is_same<int,int32_t>::value, "Int is not 32 bits!");
 
 template<typename...> struct typelist{};
 template<typename T, typename ... Rest>
-std::string call(typelist<T,Rest...>){
+inline std::string call(typelist<T,Rest...>){
   return type_to_string<T>() + "," + call(typelist<Rest...>());
 }
-std::string call(typelist<>) {return ""; }
+inline std::string call(typelist<>) {return ""; }
 
 template<typename...classes>
 constexpr std::string toNumpyStr(){
