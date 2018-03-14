@@ -4,6 +4,7 @@
   - [C style "serialization" in C++11](#c-style-serialization-in-c11)
   - [Numpy dtype string generator](#numpy-dtype-string-generator)
   - [About](#about)
+  - [TODO/Possible features](#todopossible-features)
 
 A serialization library for auto generating C-style pointer serialization. The main
 goal is so that users don't have to deal with pointer math but sacrifice
@@ -66,3 +67,10 @@ dat = numpy.frombuffer(buf, dtype = dt)
 ## About
 
 This library was written by Kevin Wang  for [SpikeGadgets]("http://www.spikegadgets.com") open source software [Trodes]("https://bitbucket.org/mkarlsso/trodes").
+
+## TODO/Possible features
+
+- Static asserts and compile error messages for things like compatible types
+- std::array's; their size is known at compile time
+- dynamic vectors? make a compile-time MAXSIZE and each vector starts with a size_t for the length, rest of data is zero'd out
+- ability for python code to serialize
