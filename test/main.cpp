@@ -1,9 +1,3 @@
-#include "serializer.h"
-#include <iostream>
-#include <cstring>
-#include <type_traits>
-#include <tuple>
-#include <string>
 #include "serialtest.h"
 enum E{e1,e2,e3};
 
