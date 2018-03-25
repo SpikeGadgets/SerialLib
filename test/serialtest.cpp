@@ -2,20 +2,21 @@
 
 void serialtest(){
         uint8_t *datacpy;
+        enum class E {e1, e2, e3};
     {
-        SpkG::Serializer<int,double,uint32_t> s;
-        int i = 1; double f = 1.123; uint32_t time = 5;
-        std::cout << "i:" << i << ", f:" << f << ", time:" << time << std::endl;
+        SpkG::Serializer<int,double,uint32_t, E> s;
+        int i = 1; double f = 1.123; uint32_t time = 5; E e = E::e2;
         std::cout << "numpystr: " << s.numpyType() << std::endl;
-        s.serialize(i,f, time);
+        std::cout << "i:" << i << ", f:" << f << ", time:" << time << ", enum: " << (e == E::e2) << std::endl;
+        s.serialize(i,f, time, e);
         datacpy = new uint8_t[s.size()];
         memcpy(datacpy, s.data(), s.size());
     }
  
     {
-        int j; double k; uint32_t t;
-        SpkG::Serializer<>::deserialize(datacpy, j, k, t);
-        std::cout << "j:" << j << ", k:" << k << ", time:" << t<< std::endl;
+        int j; double k; uint32_t t; E e;
+        SpkG::Serializer<>::deserialize(datacpy, j, k, t, e);
+        std::cout << "j:" << j << ", k:" << k << ", time:" << t<< ", enum: " << (e == E::e2) <<  std::endl;
         delete [] datacpy;
     }
 

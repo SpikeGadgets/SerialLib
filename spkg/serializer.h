@@ -76,6 +76,10 @@ public:
         return types_size<Types...>();
     }
 
+    /*!
+     * \brief Get numpy dtype string of this array's data types
+     * \return std::string, numpy dtype string
+     */
     constexpr std::string numpyType() const{
         return toNumpyStr<Types...>();
     }
@@ -91,36 +95,9 @@ public:
      */
     template <typename H, typename... Tail>          //Variadic Template declaration
     void serialize(const H &head, const Tail & ... t){
-        serialize_impl(&_data[0], 0, head, t...);
-    }
-
-//    /*!
-//     * \brief Serialize these values into your own buffer.
-//     * There is no size parameter, so your buffer *must* be large enough.
-//     *
-//     * Example usage:
-//     * int i=1,j=2,k=3; float f=3.14; uint32_t t=12345; //int=4bytes,float=4,uint32=4
-//     * uint8_t data[20];
-//     * Serializer::serializeInto(data, i, j, k, f, t); //Values are copied into data[]
-//     */
-//    template <typename H, typename... Tail>
-//    static void serializeInto(uint8_t* data, const H &head, const Tail & ... t){
-//        constexpr size_t N = types_size<H,Tail...>();
-//        serialize_impl(data, N, head, t...);
-//    }
-
-    /*!
-     * \brief Get the size of these types in bytes, known at compile time
-     * \return Returns the size
-     *
-     * Example usage:
-     * size_t size = Serializer::sizeofTypes<int8_t, int16_t, int32_t, int64_t>();
-     * //size = 1 + 2 + 4 + 8 = 15
-     */
-    template <typename H, typename... Tail>
-    constexpr static size_t sizeofTypes(){
-        constexpr size_t N = types_size<H,Tail...>();
-        return N;
+        static_assert(sizeof(H) + types_size<Tail...>() == types_size<Types...>(), 
+                      "Invalid arguments types, total size does not match Serializer's initialized size!");
+        serialize_impl(&_data[0], head, t...);
     }
 
     /*!
@@ -137,15 +114,31 @@ public:
         deserialize_impl(data, N, head, t...);
     }
 
+
+//    /*!
+//     * \brief Serialize these values into your own buffer.
+//     * There is no size parameter, so your buffer *must* be large enough.
+//     *
+//     * Example usage:
+//     * int i=1,j=2,k=3; float f=3.14; uint32_t t=12345; //int=4bytes,float=4,uint32=4
+//     * uint8_t data[20];
+//     * Serializer::serializeInto(data, i, j, k, f, t); //Values are copied into data[]
+//     */
+//    template <typename H, typename... Tail>
+//    static void serializeInto(uint8_t* data, const H &head, const Tail & ... t){
+//        constexpr size_t N = types_size<H,Tail...>();
+//        serialize_impl(data, N, head, t...);
+//    }
+
 private:
     std::array<uint8_t, types_size<Types...>()> _data;
 
-    template <typename H, typename... Tail>
-    static void serialize_impl(uint8_t *data, const int pos, const H &head, const Tail & ... t){
+    template <typename H, typename... Tail, size_t pos = types_size<Types...>()-types_size<Tail...>()-sizeof(H)>
+    static void serialize_impl(uint8_t *data, const H &head, const Tail & ... t){
         save<H>(data, pos, head);
-        serialize_impl(data, pos + sizeof(H), t...);
+        serialize_impl(data, t...);
     }
-    static void serialize_impl(uint8_t *data, int pos){}
+    static void serialize_impl(uint8_t *data){}
 
     template<typename T>
     static void save(uint8_t *data, const int pos, const T &val){

@@ -18,8 +18,7 @@ instance of the Serializer class using the passed in types.
 Using the library, the following code
 
 ```cpp
-SpkG::Serializer s;
-s.initializeBuffer<int, double, uint32_t>();
+SpkG::Serializer<int, double, uint32_t> s;
 s.serialize(1, 2.3456, 700000);
 foo_SendBuffer(s.data(), s.size());
 ```
@@ -70,7 +69,6 @@ This library was written by Kevin Wang  for [SpikeGadgets]("http://www.spikegadg
 
 ## TODO/Possible features
 
-- Static asserts and compile error messages for things like compatible types
-- std::array's; their size is known at compile time
+- Serialize std::arrays; their size is known at compile time
 - dynamic vectors? make a compile-time MAXSIZE and each vector starts with a size_t for the length, rest of data is zero'd out
 - ability for python code to serialize
