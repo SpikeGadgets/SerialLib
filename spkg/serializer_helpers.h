@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 #include <string>
 namespace SpkG{
-
+namespace helpers{
 #define SPKGINT2STR(X) #X
 
 static_assert(std::is_same<int,int32_t>::value, "int is not 32 bits on this compiler!");
@@ -57,15 +57,11 @@ inline std::string call(typelist<T,Rest...>){
 }
 inline std::string call(typelist<>) {return ""; }
 
-template<typename...classes>
-constexpr std::string toNumpyStr(){
-      return call(typelist<classes...>());
-}
-
 template<std::size_t ... X> struct add_all : std::integral_constant< std::size_t,0 > {};
 template<std::size_t X, std::size_t ... Xs> struct add_all<X,Xs...> : std::integral_constant< std::size_t, X + add_all<Xs...>::value > {};
-template<typename... T> static constexpr size_t types_size(){return add_all<sizeof(T)...>::value;}
-//https://stackoverflow.com/questions/12024304/c11-number-of-variadic-template-function-parameters
 
+}//namespace helpers
+
+//https://stackoverflow.com/questions/12024304/c11-number-of-variadic-template-function-parameters
 }//namespace SpkG
 #endif // SERIALIZER_HELPERS_H

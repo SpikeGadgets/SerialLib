@@ -24,6 +24,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace SpkG {
 
+template<typename...classes>
+constexpr std::string toNumpyStr(){
+    return helpers::call(helpers::typelist<classes...>());
+}
+
+template<typename... T> static constexpr 
+size_t types_size(){
+    return helpers::add_all<sizeof(T)...>::value;
+}
+
+
 //! Serializer is a class that uses template magic to generate at compile-time the
 //! necessary pointer math for serializing a buffer with a set of values of varying types.
 //! It also contains a deserialize function to load values from a buffer into values
