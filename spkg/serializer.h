@@ -126,20 +126,20 @@ public:
     }
 
 
-//    /*!
-//     * \brief Serialize these values into your own buffer.
-//     * There is no size parameter, so your buffer *must* be large enough.
-//     *
-//     * Example usage:
-//     * int i=1,j=2,k=3; float f=3.14; uint32_t t=12345; //int=4bytes,float=4,uint32=4
-//     * uint8_t data[20];
-//     * Serializer::serializeInto(data, i, j, k, f, t); //Values are copied into data[]
-//     */
-//    template <typename H, typename... Tail>
-//    static void serializeInto(uint8_t* data, const H &head, const Tail & ... t){
-//        constexpr size_t N = types_size<H,Tail...>();
-//        serialize_impl(data, N, head, t...);
-//    }
+   /*!
+    * \brief Serialize these values into your own buffer.
+    * There is no size parameter, so your buffer *must* be large enough.
+    *
+    * Example usage:
+    * int i=1,j=2,k=3; float f=3.14; uint32_t t=12345; //int=4bytes,float=4,uint32=4
+    * uint8_t data[20];
+    * Serializer::serializeInto(data, i, j, k, f, t); //Values are copied into data[]
+    */
+   template <typename H, typename... Tail>
+   static void serializeIntoBuffer(uint8_t* data, const H &head, const Tail & ... t){
+    //    constexpr size_t N = types_size<H,Tail...>();
+       serialize_impl(data, head, t...);
+   }
 
 private:
     std::array<uint8_t, types_size<Types...>()> _data;
@@ -159,7 +159,7 @@ private:
 
     template <typename H, typename... Tail>
     static void deserialize_impl(const uint8_t *data, const size_t n, H &head, Tail & ... t){
-        int pos = n - types_size<H,Tail...>();
+        const int pos = n - types_size<H,Tail...>();
         load<H>(data, pos, head);
         deserialize_impl(data, n, t...);
     }
