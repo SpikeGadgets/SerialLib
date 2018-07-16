@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SERIALIZER_HELPERS_H
 #include <type_traits>
 #include <string>
+#include <array>
 namespace SpkG{
 namespace helpers{
 #define SPKGINT2STR(X) #X
@@ -44,6 +45,7 @@ template<> struct NpStr<int32_t>{static const std::string value(){return "i4";}}
 template<> struct NpStr<int64_t>{static const std::string value(){return "i8";}};
 template<> struct NpStr<float>{static const std::string value(){return "f4";}};
 template<> struct NpStr<double>{static const std::string value(){return "f8";}};
+template<typename T, size_t N> struct NpStr<std::array<T,N> >{static const std::string value(){return std::to_string(N) +  NpStr<T>::value();}};
 
 template<class T> struct NpStr<T, typename std::enable_if< std::is_enum<T>::value>::type>{
   static const std::string value(){return NpStr<typename std::underlying_type<T>::type>::value();};
